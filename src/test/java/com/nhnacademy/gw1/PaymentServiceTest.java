@@ -1,6 +1,7 @@
 package com.nhnacademy.gw1;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -75,7 +76,8 @@ class PaymentServiceTest {
         assertThat(amount *service.getPointRate() == receipt.getPoint());
     }
 
-    public void pay_success_customer_addPoint(){
+    @Test
+    public void pay_success_check_pointRate(){
         //적립금이 고객의 계정에 제대로 들어갔는지
         long amount = 10_000L;
         Long customerId = 3423432L;
@@ -84,12 +86,55 @@ class PaymentServiceTest {
         when(repository.findById(customerId)).thenReturn(customer);
 
         Receipt receipt = service.pay(amount, customerId);
+        //amount에 따라서 할인율을 다르게 적용 setPointRate를 통해서
+
+        assertThat(receipt.getPointRate()).isEqualTo(0.1);
+    }
+
+    @Test
+    public void pay_success_check_pointRate(){
+        //적립금이 고객의 계정에 제대로 들어갔는지
+        long amount1 = 10_000L;
+        Long customerId1 = 3423432L;
+
+        Customer customer1 = new Customer(customerId1);
+        when(repository.findById(customerId1)).thenReturn(customer1);
+
+        Receipt receipt1 = service.pay(amount1, customerId1);
+        //amount에 따라서 할인율을 다르게 적용 setPointRate를 통해서
+
+        long amount2 = 50_000;
+        Long customerId2 = 123123L;
+        Customer customer2 = new Customer(customerId2);
+        when(repository.findById(customerId2));
+
+        Receipt receipt2 = service.pay(amount2, customerId2);
+    
+        assertAll
+
+        assertThat(receipt.getPointRate()).isEqualTo(0.1);
+    }
+
+    @Test
+    public void pay_success_customer_addPoint(){
+        //적립금이 고객의 계정에 제대로 들어갔는지
+        long amount = 10_000L;
+        Long customerId = 3423432L;
+
+        Customer customer = new Customer(customerId);
+        when(repository.findById(customerId)).thenReturn(customer);
+
+
+        Receipt receipt = service.pay(amount, customerId);
+        //amount에 따라서 할인율을 다르게 적용 setPointRate를 통해서
+        receipt.setPointRate(amount);
+
 
         //고객의 영수증에 point를 넣어줌
         //총 적립금을 제대로 계산이 됬는지(0원 적립도 체크)
         //addPoint를 했을 때 현재 적립금이 제대로 들어갔는지 확인
-//        assertThat(customer.addPoint(receipt.getPoint());
-)
 
+        assertThat(customer.addPoint(receipt.getPoint())).isEqualTo(Long.valueOf((long) (amount*service.getPointRate())));
     }
+
 }

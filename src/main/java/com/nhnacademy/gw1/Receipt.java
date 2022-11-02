@@ -6,8 +6,23 @@ public class Receipt {
   private Long point; //적립된 금액(1000원)
   private final Customer customer;
 
-  public Receipt(Customer customer){
-    this.customer = customer;
+  private double pointRate;
+
+  public void setPoint(Long point) {
+    this.point = point;
+  }
+
+  public double getPointRate() {
+    return pointRate;
+  }
+
+  public void setPointRate(double pointRate) {
+    this.pointRate = pointRate;
+  }
+
+  public Receipt(Customer customer) {
+      this.customer = customer;
+
   }
 
   public Long getAmount(){
@@ -26,7 +41,7 @@ public class Receipt {
     return point;
   }
 
-  public void setPoint(Long point) {
-    this.point = point;
+  public void setPoint(long point) {
+    this.point=point;
   }
 }
