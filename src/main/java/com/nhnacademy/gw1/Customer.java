@@ -4,7 +4,7 @@ public class Customer {
     private final Long customerId;
     private Long point; //총 적립금
 
-    private Long amount;
+    private Long balance;
 
     public Customer(Long customerId) {
         this.customerId = customerId;
@@ -20,11 +20,11 @@ public class Customer {
         return this.point;
     }
 
-    public Long getAmount() {
-        return amount;
+    public Long getBalance() {
+        return balance;
     }
 
-    public void setAmount(Long amount) {
-        this.amount = amount;
+    public void setBalance(Long balance) {
+        this.balance = balance;
     }
 }
