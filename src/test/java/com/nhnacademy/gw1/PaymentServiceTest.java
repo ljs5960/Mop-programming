@@ -13,6 +13,8 @@ import static org.mockito.Mockito.when;
 class PaymentServiceTest {
     // SUT
     PaymentService service;
+
+    NotificationService notificationService;
     // DOC
     CustomerRepository repository;
 
@@ -23,7 +25,10 @@ class PaymentServiceTest {
     void setUp() {
         repository = mock(CustomerRepository.class);
 
-        service = new PaymentService(repository);
+        notificationService = new SmsNotificationService();
+
+        service = new PaymentService(repository, notificationService);
+
     }
 
     @Test
@@ -199,5 +204,31 @@ class PaymentServiceTest {
         assertThat(receipt.getPointRate()).isEqualTo(service.getPointRate());
         assertThat(receipt.getPoint()).isEqualTo((long) (price * service.getPointRate()));
         assertThat(receipt.getCustomer().getPoint()).isEqualTo(customer.getPoint());
+    }
+
+    @Test
+    void send_notificationSuccess() {
+        // 결제 완료시 알람이 send 되는지 확인.
+        Long price = 10_000L;
+        Long customerId = 3423432L;
+        Customer customer = new Customer(customerId,CUSTOMER_BALANCE);
+
+        when(repository.findById(customerId)).thenReturn(customer);
+
+        service.pay(price, customerId);
+        assertThat(service.isMessageSent()).isTrue();
+    }
+
+    @Test
+    void send_notificationFail() {
+        // 결제 완료시 알람이 send 되는지 확인.
+        Long price = 10_000L;
+        Long customerId = 3423432L;
+        Customer customer = new Customer(customerId,CUSTOMER_BALANCE);
+
+        when(repository.findById(customerId)).thenReturn(customer);
+
+        service.pay(price, customerId);
+        assertThat(service.isMessageSent()).isTrue();
     }
 }

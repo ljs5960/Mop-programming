@@ -1,15 +1,22 @@
 package com.nhnacademy.gw1;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class PaymentService {
     private final CustomerRepository customerRepository;
     private double pointRate;
-
-    public PaymentService(CustomerRepository customerRepository) {
-        this.customerRepository = customerRepository;
-    }
-
     private static final double EXPENSIVE_POINTRATE = 0.5;
     private static final double CHEAP_POINTRATE = 0.1;
+    private NotificationService notificationService;
+    private boolean isMessageSent = true;
+
+    public PaymentService(CustomerRepository customerRepository, NotificationService notificationService) {
+        this.customerRepository = customerRepository;
+        this.notificationService = notificationService;
+    }
+
+
     /**
      * 결제처리
      *
@@ -39,8 +46,17 @@ public class PaymentService {
 
         customer.addPoint((long) (price * pointRate));
         deductPrice(price, customer);
+        if(!sendNotification("결제 완료 메시지")){
+            log.error("메시지 전송 실패");
+            isMessageSent = false;
+        }
 
         return receipt;
+    }
+
+
+    public boolean sendNotification(String message){
+        return notificationService.send(message);
     }
 
     private void deductPrice(long price, Customer customer) {
@@ -57,5 +73,9 @@ public class PaymentService {
         }else {
             this.pointRate = CHEAP_POINTRATE;
         }
+    }
+
+    public boolean isMessageSent() {
+        return isMessageSent;
     }
 }
