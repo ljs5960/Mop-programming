@@ -1,7 +1,5 @@
 package com.nhnacademy.gw1;
 
-
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +17,6 @@ class PaymentServiceTest {
     CustomerRepository repository;
 
     private final Long CUSTOMER_BALANCE = 100_000L;
-
 
     @BeforeEach
     void setUp() {
@@ -50,7 +47,7 @@ class PaymentServiceTest {
         // 음수의 금액이 들어갔을 때, service에서 throwInvalidAmoundException
         Long price = -10L;
         Long customerId = 3423432L;
-        Customer customer = new Customer(customerId,CUSTOMER_BALANCE);
+        Customer customer = new Customer(customerId, CUSTOMER_BALANCE);
         when(repository.findById(customerId)).thenReturn(customer);
 
         assertThatThrownBy(() -> service.pay(price, customerId))
@@ -58,13 +55,12 @@ class PaymentServiceTest {
                 .hasMessageContaining("Invalid", customerId.toString());
     }
 
-
     @Test
     void pay_validPrice() {
         // 유효한 결제금액 결제 시
         Long price = 10_000L;
         Long customerId = 3423432L;
-        Customer customer = new Customer(customerId,CUSTOMER_BALANCE);
+        Customer customer = new Customer(customerId, CUSTOMER_BALANCE);
 
         when(repository.findById(customerId)).thenReturn(customer);
 
@@ -77,7 +73,7 @@ class PaymentServiceTest {
         long price = 10_000L;
         Long customerId = 3423432L;
 
-        Customer customer = new Customer(customerId,CUSTOMER_BALANCE);
+        Customer customer = new Customer(customerId, CUSTOMER_BALANCE);
 
         when(repository.findById(customerId)).thenReturn(customer);
 
@@ -94,7 +90,7 @@ class PaymentServiceTest {
         Long price1 = 10_000L;
         Long customerId1 = 3423432L;
 
-        Customer customer1 = new Customer(customerId1,CUSTOMER_BALANCE);
+        Customer customer1 = new Customer(customerId1, CUSTOMER_BALANCE);
         when(repository.findById(customerId1)).thenReturn(customer1);
 
         Receipt receipt1 = service.pay(price1, customerId1);
@@ -102,11 +98,10 @@ class PaymentServiceTest {
 
         Long price2 = 50_000L;
         Long customerId2 = 123123L;
-        Customer customer2 = new Customer(customerId2,CUSTOMER_BALANCE);
+        Customer customer2 = new Customer(customerId2, CUSTOMER_BALANCE);
         when(repository.findById(customerId2)).thenReturn(customer2);
 
         Receipt receipt2 = service.pay(price2, customerId2);
-
 
         assertAll("test",
                 () -> assertEquals(0.1, receipt1.getPointRate()),
@@ -120,7 +115,7 @@ class PaymentServiceTest {
         Long price = 10_000L;
         Long customerId = 3423432L;
 
-        Customer customer = new Customer(customerId,CUSTOMER_BALANCE);
+        Customer customer = new Customer(customerId, CUSTOMER_BALANCE);
         when(repository.findById(customerId)).thenReturn(customer);
 
         Receipt receipt = service.pay(price, customerId);
@@ -137,7 +132,7 @@ class PaymentServiceTest {
         Long price = 10_000L;
         Long customerId = 3423432L;
 
-        Customer customer = new Customer(customerId,CUSTOMER_BALANCE);
+        Customer customer = new Customer(customerId, CUSTOMER_BALANCE);
         when(repository.findById(customerId)).thenReturn(customer);
 
         Receipt receipt1 = service.pay(price, customerId);
@@ -146,13 +141,12 @@ class PaymentServiceTest {
         assertThat(customer.getPoint()).isEqualTo(receipt1.getPoint() + receipt2.getPoint());
     }
 
-
     @Test
     void pay_failIfOverBalance_thenBalanceOverPriceException() {
         //물건 가격이 잔고보다 초과된 경우
         Long customerId = 3423432L;
 
-        Customer customer = new Customer(customerId,CUSTOMER_BALANCE);
+        Customer customer = new Customer(customerId, CUSTOMER_BALANCE);
 
         // 리파지토리 when
         when(repository.findById(customerId)).thenReturn(customer);
@@ -171,26 +165,25 @@ class PaymentServiceTest {
         //고객 잔고에서 결제금액이 빠졌는지 확인
         Long customerId = 3423432L;
 
-        Customer customer = new Customer(customerId,CUSTOMER_BALANCE);
+        Customer customer = new Customer(customerId, CUSTOMER_BALANCE);
 
         // 리파지토리 when
         when(repository.findById(customerId)).thenReturn(customer);
 
         Long price = 10_000L;
 
-
         Long balance = customer.getBalance();
         service.pay(price, customerId);
 
-        assertThat(customer.getBalance()).isEqualTo(balance-price);
+        assertThat(customer.getBalance()).isEqualTo(balance - price);
     }
 
     @Test
-    void pay_validateReceipt() {
+    void pay_notUsingPoint_validateReceipt() {
         // 영수증 검증 ( 제품 금액, 적립률, 적립포인트, 고객의 포인트 )
         Long customerId = 3423432L;
 
-        Customer customer = new Customer(customerId,CUSTOMER_BALANCE);
+        Customer customer = new Customer(customerId, CUSTOMER_BALANCE);
 
         // 리파지토리 when
         when(repository.findById(customerId)).thenReturn(customer);
@@ -207,11 +200,11 @@ class PaymentServiceTest {
     }
 
     @Test
-    void send_notificationSuccess() {
-        // 결제 완료시 알람이 send 되는지 확인.
+    void send_SmsNotificationSuccess() {
+        // 문자 메세지 전송 성공
         Long price = 10_000L;
         Long customerId = 3423432L;
-        Customer customer = new Customer(customerId,CUSTOMER_BALANCE);
+        Customer customer = new Customer(customerId, CUSTOMER_BALANCE);
 
         when(repository.findById(customerId)).thenReturn(customer);
 
@@ -221,11 +214,11 @@ class PaymentServiceTest {
     }
 
     @Test
-    void send_notificationFail() {
-        // 결제 완료시 알람이 send 되는지 확인.
+    void send_SmsNotificationFail() {
+        // 문자 메세지 전송 실패
         Long price = 10_000L;
         Long customerId = 3423432L;
-        Customer customer = new Customer(customerId,CUSTOMER_BALANCE);
+        Customer customer = new Customer(customerId, CUSTOMER_BALANCE);
 
         when(repository.findById(customerId)).thenReturn(customer);
 
@@ -234,14 +227,13 @@ class PaymentServiceTest {
         assertThat(service.isMessageSent()).isFalse();
     }
 
-
     @Test
     void pay_ifPointIsOverThanPrice_Success() {
         // 결제금액을 적립금과 사용자의 잔고와 합쳐서 사용
         // 1. 포인트 사용 true  & 포인트 잔고가 물건 값보다 클때
         Long price = 10_000L;
         Long customerId = 3423432L;
-        Customer customer = new Customer(customerId,CUSTOMER_BALANCE);
+        Customer customer = new Customer(customerId, CUSTOMER_BALANCE);
 
         when(repository.findById(customerId)).thenReturn(customer);
         service.pay(price, customerId);
@@ -251,7 +243,7 @@ class PaymentServiceTest {
         service.setUsingPoint(true);
         Receipt receipt = service.pay(price, customerId);
 
-        assertThat(customer.getTotalAmount()).isEqualTo(customersBalance  - (receipt.getOriginalPrice() - customersPoint));
+        assertThat(customer.getTotalAmount()).isEqualTo(customersBalance - (receipt.getOriginalPrice() - customersPoint));
     }
 
     @Test
@@ -259,7 +251,7 @@ class PaymentServiceTest {
         // 2. 포인트 사용 true  & 포인트 잔고가 물건 값보다 작을때
         Long price = 10_000L;
         Long customerId = 3423432L;
-        Customer customer = new Customer(customerId,CUSTOMER_BALANCE);
+        Customer customer = new Customer(customerId, CUSTOMER_BALANCE);
 
         when(repository.findById(customerId)).thenReturn(customer);
         service.pay(price, customerId);
@@ -269,5 +261,106 @@ class PaymentServiceTest {
         Receipt receipt = service.pay(price, customerId);
 
         assertThat(customer.getTotalAmount()).isEqualTo(customersBalance - (receipt.getOriginalPrice() - customersPoint));
+    }
+
+    @Test
+    void send_EmailNotificationSuccess() {
+        //이메일 전송 성공
+        notificationService = new EmailNotificationService();
+
+        service = new PaymentService(repository, notificationService);
+
+        Long price = 10_000L;
+        Long customerId = 3423432L;
+        Customer customer = new Customer(customerId, CUSTOMER_BALANCE);
+
+        when(repository.findById(customerId)).thenReturn(customer);
+
+        service.setNotificationMessage("결제 성공");
+        service.pay(price, customerId);
+        assertThat(service.isMessageSent()).isTrue();
+    }
+
+    @Test
+    void send_EmailNotificationFail() {
+        //이메일 전송 실패
+        notificationService = new EmailNotificationService();
+
+        service = new PaymentService(repository, notificationService);
+
+        Long price = 10_000L;
+        Long customerId = 3423432L;
+        Customer customer = new Customer(customerId, CUSTOMER_BALANCE);
+
+        when(repository.findById(customerId)).thenReturn(customer);
+
+        service.setNotificationMessage("결제 실패");
+        service.pay(price, customerId);
+        assertThat(service.isMessageSent()).isFalse();
+    }
+
+    @Test
+    void send_AppNotificationSuccess() {
+        // 앱 푸시 전송 성공
+        notificationService = new AppNotificationService();
+
+        service = new PaymentService(repository, notificationService);
+
+        Long price = 10_000L;
+        Long customerId = 3423432L;
+        Customer customer = new Customer(customerId, CUSTOMER_BALANCE);
+
+        when(repository.findById(customerId)).thenReturn(customer);
+
+        service.setNotificationMessage("결제 성공");
+        service.pay(price, customerId);
+        assertThat(service.isMessageSent()).isTrue();
+    }
+
+    @Test
+    void send_AppNotificationFail() {
+        // 앱 푸시 전송 실패
+        notificationService = new AppNotificationService();
+
+        service = new PaymentService(repository, notificationService);
+
+        Long price = 10_000L;
+        Long customerId = 3423432L;
+        Customer customer = new Customer(customerId, CUSTOMER_BALANCE);
+
+        when(repository.findById(customerId)).thenReturn(customer);
+
+        service.setNotificationMessage("결제 실패");
+        service.pay(price, customerId);
+        assertThat(service.isMessageSent()).isFalse();
+    }
+
+    @Test
+    void pay_usingPoint_validateReceipt() {
+        // 영수증 검증 ( 고객 잔여 포인트, 사용한 돈 )
+        Long customerId = 3423432L;
+
+        Customer customer = new Customer(customerId, CUSTOMER_BALANCE);
+
+        // 리파지토리 when
+        when(repository.findById(customerId)).thenReturn(customer);
+
+        Long price = 10_000L;
+
+        Long balance = customer.getBalance();
+        Receipt receipt1 = service.pay(price, customerId);
+
+        service.setUsingPoint(true);
+        Receipt receipt2 = service.pay(price, customerId);
+
+        // 첫 번째 영수증의 고객의 잔여 포인트는 1000
+        // 두 번째 영수증의 고객의 잔여 포인트는 0
+        assertThat(receipt1.getPoint()).isEqualTo((long) (price * service.getPointRate()));
+        assertThat(receipt2.getPoint()).isEqualTo(0L);
+
+        // 첫 번째 영수증의 고객의 사용 금액은 10000
+        // 두 번째 영수증의 고객의 사용 금액은 9000
+        assertThat(receipt1.getSpentBalance()).isEqualTo(price);
+        assertThat(receipt2.getSpentBalance()).isEqualTo(price-receipt1.getPoint());
     }
 }

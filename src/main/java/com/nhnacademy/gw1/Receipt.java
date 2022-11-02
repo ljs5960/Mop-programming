@@ -1,14 +1,12 @@
 package com.nhnacademy.gw1;
 
 public class Receipt {
-
   private Long originalPrice; // 총 결제 금액
   private Long point; // 적립된 포인트(1000원)
   private double pointRate; // 적립률
   private final Customer customer;
   private Long spentPoint; // 사용한 포인트
   private Long spentBalance; // 사용한 돈
-
 
   public Long getSpentPoint() {
     return spentPoint;
@@ -25,7 +23,6 @@ public class Receipt {
   public void setSpentBalance(Long spentBalance) {
     this.spentBalance = spentBalance;
   }
-
 
   public void setPoint(Long point) {
     this.point = point;
@@ -58,9 +55,4 @@ public class Receipt {
   public Long getPoint() {
     return point;
   }
-
-  public void setPoint(long point) {
-    this.point=point;
-  }
-
 }
