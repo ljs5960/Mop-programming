@@ -23,6 +23,14 @@ public class PaymentService {
         if(amount < 0 ) {
             throw  new InvalidAmountException(customerId);
         }
-        return null;
+
+        Receipt receipt = new Receipt(customer);
+        receipt.setPoint((long) (amount * pointRate)); //적립된 금액
+
+        return receipt;
+    }
+
+    public double getPointRate() {
+        return pointRate;
     }
 }
