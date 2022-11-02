@@ -15,7 +15,7 @@ class PaymentService {
     void pay(amount, customerId);
 }
 
-java```
+```
 
 - 고객의 계정은 이미 존재.
   - 계정이 없으면 예외 발생.
@@ -40,10 +40,12 @@ java```
 <h3> 결제 4 </h3>  
 
 ```java
+
 class PaymentService {
     void pay(amount, customerId, coupon);
 }
-```java
+
+```
 
 정액, %기반 할인 쿠폰 적용
 - 1000원 쿠폰, 10% 할인 쿠폰
