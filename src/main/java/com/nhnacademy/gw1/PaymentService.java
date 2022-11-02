@@ -32,10 +32,10 @@ public class PaymentService {
         Receipt receipt = new Receipt(customer);
 
         this.setPointRate(price);
-        receipt.setPointRate(this.pointRate);
+        receipt.setPointRate(this.pointRate);   // 적립률
 
-        receipt.setAmount(price);
-        receipt.setPoint((long) (price * this.pointRate)); //적립된 금액
+        receipt.setPrice(price);   // 결제 금액 = 제품 금액
+        receipt.setPoint((long) (price * this.pointRate)); // 적립된 포인트
 
         customer.addPoint((long) (price * pointRate));
         deductPrice(price, customer);

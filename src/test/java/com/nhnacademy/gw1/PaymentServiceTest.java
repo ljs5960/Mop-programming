@@ -180,4 +180,24 @@ class PaymentServiceTest {
         assertThat(customer.getBalance()).isEqualTo(balance-price);
     }
 
+    @Test
+    void pay_validateReceipt() {
+        // 영수증 검증 ( 제품 금액, 적립률, 적립포인트, 고객의 포인트 )
+        Long customerId = 3423432L;
+
+        Customer customer = new Customer(customerId,CUSTOMER_BALANCE);
+
+        // 리파지토리 when
+        when(repository.findById(customerId)).thenReturn(customer);
+
+        Long price = 10_000L;
+
+        Long balance = customer.getBalance();
+        Receipt receipt = service.pay(price, customerId);
+
+        assertThat(receipt.getPrice()).isEqualTo(price);
+        assertThat(receipt.getPointRate()).isEqualTo(service.getPointRate());
+        assertThat(receipt.getPoint()).isEqualTo((long) (price * service.getPointRate()));
+        assertThat(receipt.getCustomer().getPoint()).isEqualTo(customer.getPoint());
+    }
 }

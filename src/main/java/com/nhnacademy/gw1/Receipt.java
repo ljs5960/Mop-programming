@@ -2,11 +2,11 @@ package com.nhnacademy.gw1;
 
 public class Receipt {
 
-  private Long amount; //전체 금액
-  private Long point; //적립된 금액(1000원)
+  private Long price; // 결제 금액
+  private Long point; // 적립된 포인트(1000원)
+  private double pointRate; // 적립률
   private final Customer customer;
 
-  private double pointRate;
 
   public void setPoint(Long point) {
     this.point = point;
@@ -22,19 +22,18 @@ public class Receipt {
 
   public Receipt(Customer customer) {
       this.customer = customer;
-
   }
 
-  public Long getAmount(){
-    return this.amount;
+  public Long getPrice(){
+    return this.price;
   }
 
   public Customer getCustomer() {
     return customer;
   }
 
-  public void setAmount(Long amount) {
-    this.amount = amount;
+  public void setPrice(Long price) {
+    this.price = price;
   }
 
   public Long getPoint() {

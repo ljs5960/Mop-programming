@@ -4,4 +4,5 @@ com/nhnacademy/gw1/InvalidPriceException.class
 com/nhnacademy/gw1/Customer.class
 com/nhnacademy/gw1/Receipt.class
 com/nhnacademy/gw1/CustomerNotFoundException.class
+com/nhnacademy/gw1/BalanceOverPriceException.class
 com/nhnacademy/gw1/PaymentService.class
