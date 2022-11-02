@@ -16,6 +16,10 @@ public class Customer {
         this.point += addPoint;
     }
 
+    public void subtractPoint(Long addPoint){
+        this.point -= addPoint;
+    }
+
     public Long getPoint() { //총 적립금
         return this.point;
     }

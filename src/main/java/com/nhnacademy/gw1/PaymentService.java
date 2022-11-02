@@ -4,12 +4,16 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PaymentService {
-    private final CustomerRepository customerRepository;
-    private double pointRate;
     private static final double EXPENSIVE_POINTRATE = 0.5;
     private static final double CHEAP_POINTRATE = 0.1;
+
+    private final CustomerRepository customerRepository;
+    private double pointRate;
+
     private NotificationService notificationService;
-    private boolean isMessageSent = true;
+    private boolean isMessageSent = false;
+
+    private String notificationMessage="결제 성공";
 
     public PaymentService(CustomerRepository customerRepository, NotificationService notificationService) {
         this.customerRepository = customerRepository;
@@ -24,7 +28,7 @@ public class PaymentService {
      * @param customerId 고객 아이디
      * @return 영수증
      */
-    public Receipt pay(long price, Long customerId) {
+    public Receipt pay(long price, Long customerId,boolean usingPoint) {
         Customer customer = customerRepository.findById(customerId);
         if (customer == null) {
             throw new CustomerNotFoundException(customerId);
@@ -36,20 +40,28 @@ public class PaymentService {
             throw new BalanceOverPriceException(customerId);
         }
 
-        Receipt receipt = new Receipt(customer);
-
+        Receipt  receipt = new Receipt(customer);
         this.setPointRate(price);
-        receipt.setPointRate(this.pointRate);   // 적립률
+        if (usingPoint) {
+//            if (price < customer.getPoint()) {
+//                customer.subtractPoint();
+//            }
+            long l = price - customer.getPoint();
 
-        receipt.setPrice(price);   // 결제 금액 = 제품 금액
-        receipt.setPoint((long) (price * this.pointRate)); // 적립된 포인트
+            receipt.setPrice(price);   // 결제 금액 = 제품 금액
 
-        customer.addPoint((long) (price * pointRate));
-        deductPrice(price, customer);
-        if(!sendNotification("결제 완료 메시지")){
-            log.error("메시지 전송 실패");
-            isMessageSent = false;
+            deductPrice(price, customer);
+            isMessageSent = sendNotification(notificationMessage);
+        }else{
+            receipt.setPointRate(this.pointRate);   // 적립률
+            receipt.setPoint((long) (price * this.pointRate)); // 적립된 포인트
+            receipt.setPrice(price);   // 결제 금액 = 제품 금액
+
+            customer.addPoint((long) (price * pointRate));
+            deductPrice(price, customer);
+            isMessageSent = sendNotification(notificationMessage);
         }
+
 
         return receipt;
     }
@@ -77,5 +89,10 @@ public class PaymentService {
 
     public boolean isMessageSent() {
         return isMessageSent;
+    }
+
+
+    public void setNotificationMessage(String notificationMessage) {
+        this.notificationMessage = notificationMessage;
     }
 }
