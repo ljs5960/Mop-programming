@@ -16,7 +16,7 @@ class PaymentServiceTest {
     // DOC
     CustomerRepository repository;
 
-    private final Long CUSTOMER_BALANCE = 10_000L;
+    private final Long CUSTOMER_BALANCE = 100_000L;
 
 
     @BeforeEach
@@ -28,6 +28,7 @@ class PaymentServiceTest {
 
     @Test
     void pay_notFoundCustomer_thenThrowCustomerNotFoundException() {
+        //고객 정보 없음
         Long price = 10_000L;
         Long customerId = 3423432L;
 
@@ -66,7 +67,7 @@ class PaymentServiceTest {
     }
 
     @Test
-    void pay_success_receipt_addPoint() {
+    void pay_successReceiptAddPoint() {
         //할인율이 영수증에 제대로 들어갔는지
         long price = 10_000L;
         Long customerId = 3423432L;
@@ -83,7 +84,7 @@ class PaymentServiceTest {
     }
 
     @Test
-    public void pay_success_check_pointRate() {
+    public void pay_successCheckPointRate() {
         // 금액에 따라 적립금이 차등 적용되는지
         Long price1 = 10_000L;
         Long customerId1 = 3423432L;
@@ -109,7 +110,7 @@ class PaymentServiceTest {
     }
 
     @Test
-    public void pay_success_customer_addPoint_oneTime() {
+    public void pay_successCustomerAddPointOneTime() {
         //적립금이 고객의 계정에 제대로 들어갔는지
         Long price = 10_000L;
         Long customerId = 3423432L;
@@ -126,7 +127,7 @@ class PaymentServiceTest {
     }
 
     @Test
-    public void pay_success_customer_addPoint_twoTime() {
+    public void pay_successCustomerAddPointTwoTime() {
         // 다중 결제시 적립금이 고객의 계정에 제대로 들어갔는지
         Long price = 10_000L;
         Long customerId = 3423432L;
@@ -142,7 +143,8 @@ class PaymentServiceTest {
 
 
     @Test
-    void pay_fail_if_overBalance() {
+    void pay_failIfOverBalance_thenBalanceOverPriceException() {
+        //물건 가격이 잔고보다 초과된 경우
         Long customerId = 3423432L;
 
         Customer customer = new Customer(customerId,CUSTOMER_BALANCE);
@@ -151,16 +153,31 @@ class PaymentServiceTest {
         when(repository.findById(customerId)).thenReturn(customer);
 
         // price(물건값) 정해서
-        Long price = 10_100L;
-
-        // pay 이후
-//        Receipt receipt = service.pay(price, customerId);
+        Long price = 100_100L;
 
         //오버되는지 확인
         assertThatThrownBy(() -> service.pay(price, customerId))
                 .isInstanceOf(BalanceOverPriceException.class)
                 .hasMessageContaining("Price is over", customerId.toString());
-
-//        customer.
     }
+
+    @Test
+    void pay_deductPriceFromBalance() {
+        //고객 잔고에서 결제금액이 빠졌는지 확인
+        Long customerId = 3423432L;
+
+        Customer customer = new Customer(customerId,CUSTOMER_BALANCE);
+
+        // 리파지토리 when
+        when(repository.findById(customerId)).thenReturn(customer);
+
+        Long price = 10_000L;
+
+
+        Long balance = customer.getBalance();
+        service.pay(price, customerId);
+
+        assertThat(customer.getBalance()).isEqualTo(balance-price);
+    }
+
 }

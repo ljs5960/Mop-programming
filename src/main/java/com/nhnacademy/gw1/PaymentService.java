@@ -25,6 +25,9 @@ public class PaymentService {
         if(price < 0 ) {
             throw  new InvalidPriceException(customerId);
         }
+        if (price > customer.getBalance()) {
+            throw new BalanceOverPriceException(customerId);
+        }
 
         Receipt receipt = new Receipt(customer);
 
@@ -35,8 +38,13 @@ public class PaymentService {
         receipt.setPoint((long) (price * this.pointRate)); //적립된 금액
 
         customer.addPoint((long) (price * pointRate));
+        deductPrice(price, customer);
 
         return receipt;
+    }
+
+    private void deductPrice(long price, Customer customer) {
+        customer.setBalance(customer.getBalance()-price);
     }
 
     public double getPointRate() {
