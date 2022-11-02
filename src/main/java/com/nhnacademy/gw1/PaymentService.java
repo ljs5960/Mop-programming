@@ -15,6 +15,9 @@ public class PaymentService {
 
     private String notificationMessage="결제 성공";
 
+    private boolean usingPoint = false;
+
+
     public PaymentService(CustomerRepository customerRepository, NotificationService notificationService) {
         this.customerRepository = customerRepository;
         this.notificationService = notificationService;
@@ -28,7 +31,7 @@ public class PaymentService {
      * @param customerId 고객 아이디
      * @return 영수증
      */
-    public Receipt pay(long price, Long customerId,boolean usingPoint) {
+    public Receipt pay(long price, Long customerId) {
         Customer customer = customerRepository.findById(customerId);
         if (customer == null) {
             throw new CustomerNotFoundException(customerId);
@@ -42,15 +45,17 @@ public class PaymentService {
 
         Receipt  receipt = new Receipt(customer);
         this.setPointRate(price);
+        receipt.setPrice(price);              // 결제 금액 = 제품 금액
         if (usingPoint) {
-//            if (price < customer.getPoint()) {
-//                customer.subtractPoint();
-//            }
-            long l = price - customer.getPoint();
-
-            receipt.setPrice(price);   // 결제 금액 = 제품 금액
-
-            deductPrice(price, customer);
+            if (price <= customer.getPoint()) {
+                customer.subtractPoint(price);
+                return receipt;
+            }else{//가격이 포인트보다 큰 경우
+                long deductedPrice = price - customer.getPoint();
+                customer.subtractPoint(customer.getPoint());
+//                customer.setBalance(customer.getBalance()- deductedPrice);
+//                deductPrice(deductPrice(), customer);
+            }
             isMessageSent = sendNotification(notificationMessage);
         }else{
             receipt.setPointRate(this.pointRate);   // 적립률
@@ -61,6 +66,7 @@ public class PaymentService {
             deductPrice(price, customer);
             isMessageSent = sendNotification(notificationMessage);
         }
+
 
 
         return receipt;
@@ -94,5 +100,9 @@ public class PaymentService {
 
     public void setNotificationMessage(String notificationMessage) {
         this.notificationMessage = notificationMessage;
+    }
+
+    public void setUsingPoint(boolean usingPoint) {
+        this.usingPoint = usingPoint;
     }
 }
