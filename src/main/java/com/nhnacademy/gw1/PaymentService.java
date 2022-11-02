@@ -45,29 +45,25 @@ public class PaymentService {
 
         Receipt  receipt = new Receipt(customer);
         this.setPointRate(price);
-        receipt.setPrice(price);              // 결제 금액 = 제품 금액
+        receipt.setOriginalPrice(price);              // 결제 금액 = 제품 금액
         if (usingPoint) {
             if (price <= customer.getPoint()) {
                 customer.subtractPoint(price);
-                return receipt;
-            }else{//가격이 포인트보다 큰 경우
-                long deductedPrice = price - customer.getPoint();
+            } else {//가격이 포인트보다 큰 경우
+                long deductedPrice = price - customer.getPoint();   // 실제 결제 금액
                 customer.subtractPoint(customer.getPoint());
-//                customer.setBalance(customer.getBalance()- deductedPrice);
-//                deductPrice(deductPrice(), customer);
+                deductPrice(deductedPrice, customer);
             }
             isMessageSent = sendNotification(notificationMessage);
-        }else{
+        } else {
             receipt.setPointRate(this.pointRate);   // 적립률
             receipt.setPoint((long) (price * this.pointRate)); // 적립된 포인트
-            receipt.setPrice(price);   // 결제 금액 = 제품 금액
+            receipt.setOriginalPrice(price);   // 결제 금액 = 제품 금액
 
             customer.addPoint((long) (price * pointRate));
             deductPrice(price, customer);
             isMessageSent = sendNotification(notificationMessage);
         }
-
-
 
         return receipt;
     }
@@ -77,6 +73,7 @@ public class PaymentService {
         return notificationService.send(message);
     }
 
+    // Balance 에서 뺄 금액
     private void deductPrice(long price, Customer customer) {
         customer.setBalance(customer.getBalance()-price);
     }

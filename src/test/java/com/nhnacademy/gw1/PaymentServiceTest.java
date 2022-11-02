@@ -200,7 +200,7 @@ class PaymentServiceTest {
         Long balance = customer.getBalance();
         Receipt receipt = service.pay(price, customerId);
 
-        assertThat(receipt.getPrice()).isEqualTo(price);
+        assertThat(receipt.getOriginalPrice()).isEqualTo(price);
         assertThat(receipt.getPointRate()).isEqualTo(service.getPointRate());
         assertThat(receipt.getPoint()).isEqualTo((long) (price * service.getPointRate()));
         assertThat(receipt.getCustomer().getPoint()).isEqualTo(customer.getPoint());
@@ -236,11 +236,27 @@ class PaymentServiceTest {
 
 
     @Test
-    void pay_usingPointSuccess() {
+    void pay_ifPointIsOverThanPrice_Success() {
         // 결제금액을 적립금과 사용자의 잔고와 합쳐서 사용
-        // 1. 포인트 사용 true  & 포인트 잔고가 물건 값보다 작을때
-        // 2. 포인트 사용 true  & 포인트 잔고가 물건 값보다 클때
+        // 1. 포인트 사용 true  & 포인트 잔고가 물건 값보다 클때
+        Long price = 10_000L;
+        Long customerId = 3423432L;
+        Customer customer = new Customer(customerId,CUSTOMER_BALANCE);
 
+        when(repository.findById(customerId)).thenReturn(customer);
+        service.pay(price, customerId);
+        Long customersPoint = customer.getPoint();
+        Long customersBalance = customer.getBalance();
+        price = 100L;
+        service.setUsingPoint(true);
+        Receipt receipt = service.pay(price, customerId);
+
+        assertThat(customer.getTotalAmount()).isEqualTo(customersBalance  - (receipt.getOriginalPrice() - customersPoint));
+    }
+
+    @Test
+    void pay_ifPointIsLessThanPrice_Success() {
+        // 2. 포인트 사용 true  & 포인트 잔고가 물건 값보다 작을때
         Long price = 10_000L;
         Long customerId = 3423432L;
         Customer customer = new Customer(customerId,CUSTOMER_BALANCE);
@@ -252,8 +268,6 @@ class PaymentServiceTest {
         service.setUsingPoint(true);
         Receipt receipt = service.pay(price, customerId);
 
-        assertThat(customer.getTotalAmount()).isEqualTo(customersBalance - (receipt.getPrice() - customersPoint));
+        assertThat(customer.getTotalAmount()).isEqualTo(customersBalance - (receipt.getOriginalPrice() - customersPoint));
     }
-
-
 }
